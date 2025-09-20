@@ -41,7 +41,7 @@ export interface FinancingRequest {
   deadline: number;
 }
 
-export interface Transaction {
+export interface EncryptedTransaction {
   transactionId: number;
   amount: number;
   isEncrypted: boolean;
@@ -49,6 +49,7 @@ export interface Transaction {
   to: string;
   transactionType: string;
   timestamp: number;
+  encryptedData: string;
 }
 
 // Contract ABI (simplified for frontend integration)
@@ -67,8 +68,10 @@ export const VAULT_LUXE_FINANCE_ABI = [
   "function approveFinancing(uint256 _requestId, address _borrower) external",
   "function getFinancingRequestInfo(uint256 _requestId) external view returns (uint32, uint32, uint32, bool, bool, address, address, uint256, uint256)",
   
-  // Transactions
-  "function executeTransaction(address _to, uint32 _amount, string memory _transactionType) external returns (uint256)",
+  // Encrypted Transactions
+  "function executeEncryptedTransaction(address _to, uint32 _amount, string memory _transactionType, string memory _encryptedData) external returns (uint256)",
+  "function processSecurePayment(uint256 _transactionId, string memory _encryptedPaymentData) external",
+  "function getEncryptedTransactionInfo(uint256 _transactionId) external view returns (uint32, bool, address, address, string memory, uint256, string memory)",
   
   // User data
   "function getUserAssets(address _user) external view returns (uint256[])",
@@ -80,5 +83,5 @@ export const VAULT_LUXE_FINANCE_ABI = [
   "event AssetRegistered(uint256 indexed assetId, address indexed owner, string assetType)",
   "event VaultCreated(uint256 indexed vaultId, address indexed creator, string vaultName)",
   "event FinancingRequested(uint256 indexed requestId, address indexed borrower, uint32 amount)",
-  "event TransactionExecuted(uint256 indexed transactionId, address indexed from, address indexed to, uint32 amount)"
+  "event EncryptedTransactionExecuted(uint256 indexed transactionId, address indexed from, address indexed to, uint32 amount)"
 ] as const;

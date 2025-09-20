@@ -47,7 +47,7 @@ contract VaultLuxeFinance {
         uint256 deadline;
     }
     
-    struct Transaction {
+    struct EncryptedTransaction {
         euint32 transactionId;
         euint32 amount;
         ebool isEncrypted;
@@ -55,12 +55,13 @@ contract VaultLuxeFinance {
         address to;
         string transactionType;
         uint256 timestamp;
+        string encryptedData;
     }
     
     mapping(uint256 => LuxuryAsset) public assets;
     mapping(uint256 => Vault) public vaults;
     mapping(uint256 => FinancingRequest) public financingRequests;
-    mapping(uint256 => Transaction) public transactions;
+    mapping(uint256 => EncryptedTransaction) public encryptedTransactions;
     mapping(address => euint32) public userReputation;
     mapping(address => euint32) public userCreditScore;
     mapping(uint256 => uint256[]) public vaultAssets;
@@ -79,7 +80,7 @@ contract VaultLuxeFinance {
     event AssetRegistered(uint256 indexed assetId, address indexed owner, string assetType);
     event VaultCreated(uint256 indexed vaultId, address indexed creator, string vaultName);
     event FinancingRequested(uint256 indexed requestId, address indexed borrower, uint32 amount);
-    event TransactionExecuted(uint256 indexed transactionId, address indexed from, address indexed to, uint32 amount);
+    event EncryptedTransactionExecuted(uint256 indexed transactionId, address indexed from, address indexed to, uint32 amount);
     event AssetVerified(uint256 indexed assetId, bool isVerified);
     event ReputationUpdated(address indexed user, uint32 reputation);
     
@@ -206,28 +207,42 @@ contract VaultLuxeFinance {
         financingRequests[_requestId].lender = msg.sender;
     }
     
-    function executeTransaction(
+    function executeEncryptedTransaction(
         address _to,
         euint32 _amount,
-        string memory _transactionType
+        string memory _transactionType,
+        string memory _encryptedData
     ) public returns (uint256) {
         require(_to != address(0), "Invalid recipient address");
         require(bytes(_transactionType).length > 0, "Transaction type cannot be empty");
+        require(bytes(_encryptedData).length > 0, "Encrypted data cannot be empty");
         
         uint256 transactionId = transactionCounter++;
         
-        transactions[transactionId] = Transaction({
+        encryptedTransactions[transactionId] = EncryptedTransaction({
             transactionId: _amount, // Will be set properly
             amount: _amount,
             isEncrypted: Fhe.asEbool(true),
             from: msg.sender,
             to: _to,
             transactionType: _transactionType,
-            timestamp: block.timestamp
+            timestamp: block.timestamp,
+            encryptedData: _encryptedData
         });
         
-        emit TransactionExecuted(transactionId, msg.sender, _to, Fhe.decrypt(_amount));
+        emit EncryptedTransactionExecuted(transactionId, msg.sender, _to, Fhe.decrypt(_amount));
         return transactionId;
+    }
+    
+    function processSecurePayment(
+        uint256 _transactionId,
+        string memory _encryptedPaymentData
+    ) public {
+        require(encryptedTransactions[_transactionId].from == msg.sender, "Only transaction initiator can process");
+        require(bytes(_encryptedPaymentData).length > 0, "Payment data cannot be empty");
+        
+        // Update transaction with encrypted payment data
+        encryptedTransactions[_transactionId].encryptedData = _encryptedPaymentData;
     }
     
     function verifyAsset(uint256 _assetId, ebool _isVerified) public {
@@ -321,6 +336,27 @@ contract VaultLuxeFinance {
             request.lender,
             request.requestTime,
             request.deadline
+        );
+    }
+    
+    function getEncryptedTransactionInfo(uint256 _transactionId) public view returns (
+        uint32 amount,
+        bool isEncrypted,
+        address from,
+        address to,
+        string memory transactionType,
+        uint256 timestamp,
+        string memory encryptedData
+    ) {
+        EncryptedTransaction storage transaction = encryptedTransactions[_transactionId];
+        return (
+            Fhe.decrypt(transaction.amount),
+            Fhe.decrypt(transaction.isEncrypted),
+            transaction.from,
+            transaction.to,
+            transaction.transactionType,
+            transaction.timestamp,
+            transaction.encryptedData
         );
     }
     

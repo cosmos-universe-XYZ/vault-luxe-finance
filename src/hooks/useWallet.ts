@@ -100,21 +100,40 @@ export const useContract = () => {
     }
   };
 
-  const executeTransaction = async (
+  const executeEncryptedTransaction = async (
     to: string,
     amount: number,
-    transactionType: string
+    transactionType: string,
+    encryptedData: string
   ) => {
     try {
       const hash = await writeContract({
         address: CONTRACT_ADDRESS as `0x${string}`,
         abi: VAULT_LUXE_FINANCE_ABI,
-        functionName: 'executeTransaction',
-        args: [to, amount, transactionType]
+        functionName: 'executeEncryptedTransaction',
+        args: [to, amount, transactionType, encryptedData]
       });
       return hash;
     } catch (error) {
-      console.error('Error executing transaction:', error);
+      console.error('Error executing encrypted transaction:', error);
+      throw error;
+    }
+  };
+
+  const processSecurePayment = async (
+    transactionId: number,
+    encryptedPaymentData: string
+  ) => {
+    try {
+      const hash = await writeContract({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: VAULT_LUXE_FINANCE_ABI,
+        functionName: 'processSecurePayment',
+        args: [transactionId, encryptedPaymentData]
+      });
+      return hash;
+    } catch (error) {
+      console.error('Error processing secure payment:', error);
       throw error;
     }
   };
@@ -124,6 +143,7 @@ export const useContract = () => {
     createVault,
     addAssetToVault,
     requestFinancing,
-    executeTransaction
+    executeEncryptedTransaction,
+    processSecurePayment
   };
 };

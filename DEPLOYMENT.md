@@ -1,4 +1,4 @@
-# Vercel Deployment Guide for Vault Luxe Finance
+# Vercel Deployment Guide
 
 This guide provides step-by-step instructions for deploying the Vault Luxe Finance platform to Vercel.
 
@@ -37,13 +37,13 @@ Click "Environment Variables" and add the following variables:
 
 ```
 NEXT_PUBLIC_CHAIN_ID=11155111
-NEXT_PUBLIC_RPC_URL=https://sepolia.infura.io/v3/b18fb7e6ca7045ac83c41157ab93f990
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=2ec9743d0d0cd7fb94dee1a7e6d33475
-NEXT_PUBLIC_INFURA_API_KEY=b18fb7e6ca7045ac83c41157ab93f990
+NEXT_PUBLIC_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=YOUR_WALLETCONNECT_ID
+NEXT_PUBLIC_INFURA_API_KEY=YOUR_INFURA_KEY
 NEXT_PUBLIC_RPC_URL=https://1rpc.io/sepolia
 ```
 
-**Important**: Make sure to add these variables for all environments (Production, Preview, Development).
+**Important**: Replace `YOUR_INFURA_KEY` and `YOUR_WALLETCONNECT_ID` with your actual keys.
 
 ### 5. Advanced Configuration (Optional)
 
@@ -85,7 +85,7 @@ If you need to customize the build process, create a `vercel.json` file in the r
 
 1. Click "Deploy" button
 2. Wait for the build process to complete (usually 2-3 minutes)
-3. Vercel will provide you with a deployment URL (e.g., `https://vault-luxe-finance.vercel.app`)
+3. Vercel will provide you with a deployment URL
 
 ### 7. Custom Domain (Optional)
 
